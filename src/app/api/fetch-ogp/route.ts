@@ -61,8 +61,8 @@ export async function GET(req: NextRequest) {
                         '';
 
     const ogImage = $('meta[property="og:image"]').attr('content') ||
-                  // $('meta[name="twitter:image"]').attr('content') ||
-                  // $('img').first().attr('src') ||
+                  $('meta[name="twitter:image"]').attr('content') ||
+                  $('img').first().attr('src') ||
                   '';
 
     const ogUrl = $('meta[property="og:url"]').attr('content') ||
