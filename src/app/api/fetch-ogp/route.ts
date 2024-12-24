@@ -1,38 +1,5 @@
-// import { NextRequest, NextResponse } from 'next/server';
-// import { load } from 'cheerio'; // 名前付きインポートに変更
-
-// export async function GET(req: NextRequest) {
-//   const { searchParams } = new URL(req.url);
-//   const url = searchParams.get('url');
-
-//   if (!url) {
-//     return NextResponse.json({ error: 'URL is required' }, { status: 400 });
-//   }
-
-//   try {
-//     const response = await fetch(url);
-//     const html = await response.text();
-
-//     const $ = load(html); // 名前付きインポートの関数を使用
-
-//     const ogTitle = $('meta[property="og:title"]').attr('content') || '';
-//     const ogDescription = $('meta[property="og:description"]').attr('content') || '';
-//     const ogImage = $('meta[property="og:image"]').attr('content') || '';
-//     const ogUrl = $('meta[property="og:url"]').attr('content') || url;
-
-//     return NextResponse.json({
-//       title: ogTitle,
-//       description: ogDescription,
-//       image: ogImage,
-//       url: ogUrl,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return NextResponse.json({ error: 'Failed to fetch OGP data' }, { status: 500 });
-//   }
-// }
 import { NextRequest, NextResponse } from 'next/server';
-import { load } from 'cheerio';
+import { load } from 'cheerio';// import { load } from 'cheerio'; // 名前付きインポートに変更
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -46,7 +13,7 @@ export async function GET(req: NextRequest) {
     const response = await fetch(url);
     const html = await response.text();
 
-    const $ = load(html);
+    const $ = load(html);// 名前付きインポートの関数を使用
 
     // OGPタグから情報を取得し、なければ代替のメタタグや要素から取得
     const ogTitle = $('meta[property="og:title"]').attr('content') ||
