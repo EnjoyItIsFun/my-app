@@ -1,6 +1,6 @@
 'use client';
 
-import LogOutButton from '../LogOutButton/page';
+import LogOutButton from './LogOutButton';
 
 const Header = () => {
     return (
