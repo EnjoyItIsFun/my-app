@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface FloatingActionButtonProps {
-  // onAddUrl: (url: string) => Promise<void>;
 
   onAddUrl?: (url: string) => Promise<void>;
 }
@@ -18,13 +17,9 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onAddUrl })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // await onAddUrl(url);
     if (onAddUrl) {
       await onAddUrl(url); // `onAddUrl`が存在する場合のみ呼び出し
     } 
-
-
-    
     setUrl('');
     toggleModal();
 

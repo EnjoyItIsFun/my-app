@@ -1,12 +1,14 @@
 'use client';
 
+import LogOutButton from '../LogOutButton/page';
+
 const Header = () => {
     return (
       <header className="bg-[#ffeaed] dark:bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-gray-800 dark:text-white text-2xl">⚡MyPortal⚡</h1>
           <div className="relative">
-            <input
+            {/* <input
               type="text"
               placeholder="Search..."
               className="pl-4 pr-8 py-2 rounded-full bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none"
@@ -20,7 +22,8 @@ const Header = () => {
                 width="20"
                 height="20"
             >
-            </svg>
+            </svg> */}
+            <LogOutButton />
           </div>
         </div>
       </header>
