@@ -46,7 +46,7 @@ export default function RegisterPage() {
             }
 
             // 登録成功時の処理
-            router.push("/user/login?registered=true") // ログインページへリダイレクト
+            router.push("/?registered=true") // ログインページへリダイレクト
             
         } catch (error) {
             setError(error instanceof Error ? error.message : "エラーが発生しました")
@@ -124,7 +124,7 @@ export default function RegisterPage() {
 
                 <p className="mt-4 text-center text-sm text-gray-600">
                     既にアカウントをお持ちの方は{" "}
-                    <Link href="/user/login" className="text-blue-600 hover:text-blue-500">
+                    <Link href="/" className="text-blue-600 hover:text-blue-500">
                         こちらからログイン
                     </Link>
                 </p>

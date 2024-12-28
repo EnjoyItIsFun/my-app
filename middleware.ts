@@ -26,6 +26,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    // matcher: ["/api/item/create", "/api/item/update/:path*", "/api/item/delete/:path*"],
     matcher: ["/api/fetch-ogp/:path*"],
 }

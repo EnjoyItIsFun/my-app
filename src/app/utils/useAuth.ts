@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { jwtVerify } from "jose"
-
-const useAuth = () => {
-    const [loginUserEmail, setLoginUserEmail] = useState("")
+interface AuthState {
+    loginUserEmail: string | null;
+    isLoading: boolean;
+  }
+const useAuth = () : AuthState => {
+    // const useAuth = ()  => {
+    // const [loginUserEmail, setLoginUserEmail] = useState("")
+    const [loginUserEmail, setLoginUserEmail] = useState<string | null>(null) // null を初期値として使用
 
     const router = useRouter() 
 
@@ -30,7 +35,11 @@ const useAuth = () => {
         checkToken() 
     }, [router]) 
 
-    return loginUserEmail
+    // return loginUserEmail
+    return {
+        loginUserEmail,
+        isLoading: loginUserEmail === null
+    }
 }
 
 export default useAuth

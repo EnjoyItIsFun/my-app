@@ -24,7 +24,7 @@ export default function LogOutButton() {
           // 例: ReduxやContextを利用している場合に、認証フラグをfalseにする
     
           // 3. ログインページへリダイレクト
-          router.replace("/user/login");
+          router.replace("/");
         } catch (error) {
           console.error("Logout failed:", error);
         }
