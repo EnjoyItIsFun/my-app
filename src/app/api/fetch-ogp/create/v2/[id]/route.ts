@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { load } from 'cheerio';// 名前付きインポートに変更
+import { load } from 'cheerio';
 import { generateTextImage } from '@/app/utils/imageGenerator';
-// import connectDB from "@/app/utils/database";
-// import { CardModel } from "@/app/utils/schemaModels";
+import connectDB from "@/app/utils/database";
+import { CardModel } from "@/app/utils/schemaModels";
+import  useAuth  from "@/app/utils/useAuth";
 
 export async function GET(req: NextRequest) {
+  const loginUserEmail = useAuth()
   const { searchParams } = new URL(req.url);
   const url = searchParams.get('url');
 
@@ -13,11 +15,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // MongoDBに接続
+    await connectDB();
+
     const response = await fetch(url);
     const html = await response.text();
-    const $ = load(html);// 名前付きインポートの関数を使用
+    const $ = load(html);
 
-    // OGPタグから情報を取得し、なければ代替のメタタグや要素から取得
     const ogTitle = $('meta[property="og:title"]').attr('content') ||
                   $('meta[name="twitter:title"]').attr('content') ||
                   $('title').text() ||
@@ -32,44 +36,41 @@ export async function GET(req: NextRequest) {
     const ogImage = $('meta[property="og:image"]').attr('content') ||
                   $('meta[name="twitter:image"]').attr('content') ||
                   $('img').first().attr('src');
-                  console.log('Original image URL:', ogImage);
 
-    const ogUrl = $('meta[property="og:url"]').attr('content') ||
-                url;
+    const ogUrl = $('meta[property="og:url"]').attr('content') || url;
 
-  let finalImageUrl = '';
-  // 相対URLを絶対URLに変換
-  const baseUrl = new URL(url).origin;
-  // const absoluteImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, baseUrl).toString();
-  if (ogImage) {
-    finalImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, baseUrl).toString();
+    let finalImageUrl = '';
+    const baseUrl = new URL(url).origin;
     
-  } else {
-    // 画像が見つからない場合、タイトルベースの画像を生成
-    finalImageUrl = generateTextImage(ogTitle);
-  }
-  console.log('Final image URL:', finalImageUrl);
-  // データの存在確認とトリミング
-  const responseData = {
-    title: ogTitle.trim(),
-    description: ogDescription.trim(),
-    // image: absoluteImage,
-    image: finalImageUrl,
-    url: ogUrl,
-  };
+    if (ogImage) {
+      finalImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, baseUrl).toString();
+    } else {
+      finalImageUrl = generateTextImage(ogTitle);
+    }
 
-    // 必須データの確認
-    // if (!responseData.title || !responseData.image) {
-        // タイトルのチェックのみ行う（画像は必ず存在するようになった）
-    if (!responseData.title) {
+    const cardData = {
+      title: ogTitle.trim(),
+      description: ogDescription.trim(),
+      image: finalImageUrl,
+      url: ogUrl,
+      email: loginUserEmail
+    };
+
+    if (!cardData.title) {
       return NextResponse.json({ error: 'Required OGP data not found' }, { status: 404 });
     }
 
-    return NextResponse.json(responseData);
-  } catch (error) {
-    console.error('Error fetching OGP data:', error);
-    return NextResponse.json({ error: 'Failed to fetch OGP data' }, { status: 500 });
-  }
+    // MongoDBにデータを保存
+    const newCard = new CardModel(cardData);
+    await newCard.save();
 
-  
+    return NextResponse.json({
+      ...cardData,
+      _id: newCard._id // MongoDBのドキュメントIDも返す
+    });
+
+  } catch (error) {
+    console.error('Error processing request:', error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
+  }
 }

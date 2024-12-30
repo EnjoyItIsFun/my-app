@@ -1,27 +1,3 @@
-// import { NextResponse } from "next/server"
-// import connectDB from "../../../utils/database"
-// import { UserModel } from "../../../utils/schemaModels"
-
-// interface RequestBody {
-//     name: string;
-//     email: string;
-//     password: string;
-// }
-
-// export async function POST(request: Request): Promise<NextResponse> {
-//     const reqBody: RequestBody = await request.json();
-
-//     try {
-//         await connectDB();
-//         await UserModel.create(reqBody);
-//         return NextResponse.json({ message: "ユーザー登録成功" });
-//     } catch (err) {
-//         console.error(err);
-//         return NextResponse.json({ message: "ユーザー登録失敗" });
-//     }
-// }
-
-
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { UserModel } from "../../../utils/schemaModels"

@@ -7,14 +7,6 @@ export default function LogOutButton() {
 
     const router = useRouter()
 
-    // const handleLogout = () => {
-    //     localStorage.removeItem("token") // もしトークンを使用している場合
-    //     // または sessionStorage.removeItem("token")
-        
-    //     // 2. ログインページへリダイレクト
-    //     router.replace("/user/login") // pushの代わりにreplaceを使用
-    //     // router.push("/user/login")
-    // }
     const handleLogout = async () => {
         try {
           // 1. ローカルストレージからトークンを削除

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Image from 'next/image';
 import FloatingActionButton from "../components/FloatingActionButton";
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
@@ -10,56 +10,150 @@ import TurnedInNotIcon from '@mui/icons-material/TurnedInNot';
 import TurnedInIcon from '@mui/icons-material/TurnedIn';
 // import useAuth from './utils/useAuth';
 import Header from '../components/Header';
-
+// import connectDB from '@/app/utils/database';
 
 type LinkData = {
-  url: string;
-  image: string;
-  title: string;
-  description: string;
-};
+    _id: string;      // MongoDBのIDを追加
+    url: string;
+    image: string;
+    title: string;
+    description: string;
+    };
 
-const fetchOGPData = async (url: string) => {
-  try {
-    const response = await fetch(`/api/fetch-ogp/create/v1?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching OGP data:', error);
-    throw error;
-  }
-};
-export default function Home() {
+export default function Main() {
+    // ユーザーIDを取得する共通関数
+    const getUserId = () => {
+        const userId = localStorage.getItem('userId');
+        console.log('取得したユーザーID:', userId);
+        if (!userId) {
+            console.error('ユーザーIDが見つかりません。再度ログインしてください。');
+            // ここでログインページへのリダイレクトを実装することもできます
+            return null;
+        }
+        return userId;
+    };
 
-  const [state, setState] = useState<{
-    links: LinkData[];
-    openMenuIndex: number | null;
-    likes: number[];
-    likedStatus: boolean[];
-    savedStatus: boolean[];
-  }>({
-    links: [],
-    openMenuIndex: null,
-    likes: [],
-    likedStatus: [],
-    savedStatus: []
-  });
+    // カード情報を取得する関数
+    const fetchUserCards = async (userId: string) => {
+        try {
+            if (!userId) {
+                throw new Error('ユーザーIDが指定されていません');
+            }
+            console.log('Fetching cards for userId:', userId);
 
-  const handleAddUrl = async (url: string) => {
-    try {
-      const ogpData = await fetchOGPData(url);
-      setState(prevState => ({
-        ...prevState,
-        links: [...prevState.links, ogpData],
-        likes: [...prevState.likes, 0],
-        likedStatus: [...prevState.likedStatus, false],
-        savedStatus: [...prevState.savedStatus, false]
-      }));
-    } catch (error) {
-      console.error('Error adding URL:', error);
+            const response = await fetch(`/api/fetch-ogp/readall/${userId}`, {
+                cache: "no-store",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        
+            const data = await response.json();
+            console.log('APIレスポンス:', data);
+
+            if (!response.ok) {
+                // エラーメッセージをより詳細に
+                throw new Error(
+                    `カードの取得に失敗しました。ステータス: ${response.status}, メッセージ: ${data.message}, エラー: ${data.error}`
+                );
+            }
+            
+
+    if (!data.cards) {
+        throw new Error('レスポンスにカードデータが含まれていません');
     }
-  };
 
+    // 状態を更新
+    setState(prevState => ({
+        ...prevState,
+        links: data.cards,
+        likes: data.cards.map(() => 0),
+        likedStatus: data.cards.map(() => false),
+        savedStatus: data.cards.map(() => false)
+    }));
+
+    console.log('カードデータの読み込みが完了しました');
+
+} catch (error) {
+    console.error('カードの取得に失敗しました:', error);
+    if (error instanceof Error) {
+        alert(`カードの取得に失敗しました: ${error.message}`);
+    } else {
+        alert('カードの取得に失敗しました: 不明なエラー');
+    }
+}
+};
+
+    // 初期データの読み込み
+    useEffect(() => {
+        const userId = getUserId();
+        if (userId) {
+            console.log('Initializing with userId:', userId);
+            fetchUserCards(userId);
+        }else {
+            console.error('UserId not found in localStorage');
+            // ユーザーIDがない場合の処理を追加
+            // 例: ログインページへのリダイレクト
+        }
+    }, []);
+
+    // 状態管理
+    const [state, setState] = useState<{
+        links: LinkData[];
+        openMenuIndex: number | null;
+        likes: number[];
+        likedStatus: boolean[];
+        savedStatus: boolean[];
+    }>({
+        links: [],
+        openMenuIndex: null,
+        likes: [],
+        likedStatus: [],
+        savedStatus: []
+    });
+
+    // URLの追加処理
+    const handleAddUrl = async (url: string) => {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                alert("ログインが必要です")
+                return ;
+            }
+
+            if (!url.startsWith('http')) {
+                alert('有効なURLを入力してください');
+                return;
+            }
+
+            const response = await fetch(
+                `/api/fetch-ogp/create/v1?url=${encodeURIComponent(url)}&userId=${userId}`,
+                { 
+                    cache: "no-store",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'カードの保存に失敗しました');
+            }
+            console.log('カードを保存しました:', data);
+            setState(prevState => ({
+                ...prevState,
+                links: [...prevState.links, data],
+                likes: [...prevState.likes, 0],
+                likedStatus: [...prevState.likedStatus, false],
+                savedStatus: [...prevState.savedStatus, false]
+            }));
+        } catch (error) {
+            console.error('URLの追加に失敗しました:', error);
+            alert(error instanceof Error ? error.message : 'URLの追加に失敗しました');
+        }
+    };
   const toggleMenu = (index: number) => {
     setState(prevState => ({
       ...prevState,
@@ -104,17 +198,6 @@ export default function Home() {
       };
     });
   };
-
-  // const { loginUserEmail, isLoading } = useAuth()
-
-  // if (isLoading) {
-  //   return <div>Loading...</div> // またはローディングスピナーなどを表示
-  // }
-  // // const loginUserEmail  = useAuth();
-
-  // if(!loginUserEmail){// loginUserEmailの監視があることで、ログインしていない場合はログインページにリダイレクトのはずが、リダイレクトされない
-  //   return null; //
-  // }
     return (
       <div>
         <Header />
@@ -122,7 +205,7 @@ export default function Home() {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 justify-items-center">
           {state.links.map((link, index) => (
             <div 
-              key={index} 
+              key={link._id} 
               className="mb-3 p-3 border rounded-lg w-96 relative 
                 bg-white dark:bg-neutral-900 
                 border-gray-200 dark:border-neutral-700 w-full flex flex-col"

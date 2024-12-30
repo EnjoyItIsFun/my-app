@@ -1,5 +1,3 @@
-// utils/imageGenerator.ts
-
 export function generateTextImage(text: string): string {
     // テキストを適切な長さに調整
     const truncatedText = text.length > 50 ? text.substring(0, 47) + '...' : text;

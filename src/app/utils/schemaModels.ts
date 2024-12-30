@@ -2,12 +2,42 @@ import mongoose from "mongoose"
 
 const Schema = mongoose.Schema
 
+// const CardSchema = new Schema({
+//     title: String,       
+//     image: String,    
+//     description: String,
+//     url: String,
+//     userId: {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: 'User',
+//         required: true
+//     }
+// })
 const CardSchema = new Schema({
-    title: String,       
-    image: String,    
-    description: String,
-    url: String
-})
+    title: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    url: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
+}, {
+    timestamps: true  // createdAt, updatedAtフィールドを自動で追加
+});
 
 const UserSchema = new Schema({
     email: {
