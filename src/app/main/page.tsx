@@ -161,15 +161,64 @@ export default function Main() {
     }));
   };
 
-  const handleDeleteLink = (indexToRemove: number) => {
-    setState(prevState => ({
-      links: prevState.links.filter((_, index) => index !== indexToRemove),
-      openMenuIndex: null,
-      likes: prevState.likes.filter((_, index) => index !== indexToRemove),
-      likedStatus: prevState.likedStatus.filter((_, index) => index !== indexToRemove),
-      savedStatus: prevState.savedStatus.filter((_, index) => index !== indexToRemove)
-    }));
-  };
+//   const handleDeleteLink = (indexToRemove: number) => {
+//     setState(prevState => ({
+//       links: prevState.links.filter((_, index) => index !== indexToRemove),
+//       openMenuIndex: null,
+//       likes: prevState.likes.filter((_, index) => index !== indexToRemove),
+//       likedStatus: prevState.likedStatus.filter((_, index) => index !== indexToRemove),
+//       savedStatus: prevState.savedStatus.filter((_, index) => index !== indexToRemove)
+//     }));
+//   };
+    const handleDeleteLink = async (indexToRemove: number) => {
+        try {
+            // ローカルストレージからユーザーIDを取得
+            const userId = getUserId();
+            if (!userId) {
+                alert("ログインが必要です");
+                return;
+            }
+
+            // 削除対象のカードのIDを取得
+            const cardId = state.links[indexToRemove]._id;
+            
+            // 削除の確認
+            if (!confirm("このカードを削除してもよろしいですか？")) {
+                return;
+            }
+
+            // APIを呼び出してDBから削除
+            const response = await fetch(`/api/fetch-ogp/delete/${cardId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId  // MongoDBのユーザーIDを送信
+                })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+
+            // 削除成功時のみ、UIを更新
+            setState(prevState => ({
+                ...prevState,
+                links: prevState.links.filter((_, index) => index !== indexToRemove),
+                openMenuIndex: null,
+                likes: prevState.likes.filter((_, index) => index !== indexToRemove),
+                likedStatus: prevState.likedStatus.filter((_, index) => index !== indexToRemove),
+                savedStatus: prevState.savedStatus.filter((_, index) => index !== indexToRemove)
+            }));
+
+        } catch (error) {
+            console.error('削除処理でエラーが発生:', error);
+            alert(error instanceof Error ? error.message : '削除処理に失敗しました');
+        }
+    };
 
   const handleLikeToggle = (index: number) => {
     setState(prevState => {
