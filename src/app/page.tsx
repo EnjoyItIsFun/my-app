@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -10,6 +10,13 @@ export default function LoginPage() {
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+      // 開発環境とデプロイ環境の判別
+      console.log("Current environment:", process.env.NODE_ENV);
+      // APIのベースURL確認
+      console.log("API Base URL:", window.location.origin);
+  }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
