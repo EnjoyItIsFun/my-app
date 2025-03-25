@@ -45,7 +45,7 @@ interface ContextParams {
 }
 
 interface Context {
-    params: ContextParams;
+    params: Promise<ContextParams>;
 }
 
 export async function DELETE(request: Request, context: Context): Promise<NextResponse> {
@@ -55,14 +55,14 @@ export async function DELETE(request: Request, context: Context): Promise<NextRe
         await connectDB();
         
         // MongoDBのObjectIDとして有効かチェック
-        if (!mongoose.Types.ObjectId.isValid(context.params.id) || 
+        if (!mongoose.Types.ObjectId.isValid((await context.params).id) || 
             !mongoose.Types.ObjectId.isValid(reqBody.userId)) {
             return NextResponse.json({ message: "無効なIDです" }, { status: 400 });
         }
 
         // カードの存在確認と所有者チェックを同時に行う
         const singleItem = await CardModel.findOne({
-            _id: context.params.id,
+            _id: (await context.params).id,
             userId: reqBody.userId
         });
 
@@ -74,7 +74,7 @@ export async function DELETE(request: Request, context: Context): Promise<NextRe
         }
 
         // 削除実行
-        await CardModel.deleteOne({ _id: context.params.id });
+        await CardModel.deleteOne({ _id: (await context.params).id });
         return NextResponse.json({ message: "カードを削除しました" }, { status: 200 });
 
     } catch (err) {

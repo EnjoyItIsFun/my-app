@@ -4,9 +4,9 @@ import { CardModel } from "../../../../utils/schemaModels"
 import mongoose from "mongoose"
 
 interface Context {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 export async function GET(request: NextRequest,
     context: Context) {
@@ -136,7 +136,7 @@ try {
     }
 
     // ユーザーIDの検証
-    const userId = context.params.id;
+    const userId = (await context.params).id;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
         console.error("無効なユーザーID:", userId);
         return NextResponse.json(
