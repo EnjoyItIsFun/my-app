@@ -6,8 +6,8 @@ interface AuthState {
     loginUserEmail: string | null;
     isLoading: boolean;
   }
-const useAuth = () : AuthState => {
-    // const useAuth = ()  => {
+const useAuthUser = () : AuthState => {
+    // const getAuthUser = ()  => {
     // const [loginUserEmail, setLoginUserEmail] = useState("")
     const [loginUserEmail, setLoginUserEmail] = useState<string | null>(null) // null を初期値として使用
 
@@ -43,4 +43,4 @@ const useAuth = () : AuthState => {
     }
 }
 
-export default useAuth
+export default useAuthUser

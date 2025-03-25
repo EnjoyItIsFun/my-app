@@ -3,10 +3,10 @@ import { load } from 'cheerio';
 import { generateTextImage } from '@/app/utils/imageGenerator';
 import connectDB from "@/app/utils/database";
 import { CardModel } from "@/app/utils/schemaModels";
-import  useAuth  from "@/app/utils/useAuth";
+import  useAuthUser  from "@/app/utils/useAuth";
 
 export async function GET(req: NextRequest) {
-  const loginUserEmail = useAuth()
+  const loginUserEmail = useAuthUser()
   const { searchParams } = new URL(req.url);
   const url = searchParams.get('url');
 
